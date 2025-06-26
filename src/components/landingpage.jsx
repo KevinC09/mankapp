@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthModal from './authModal';
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [showSearch, setShowSearch] = useState(false);
+  
   const [view, setView] = useState('landing');
   const [showAuth, setShowAuth] = useState(false);
 

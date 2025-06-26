@@ -88,7 +88,7 @@ const CartPage = () => {
           >
             <FaArrowLeft />
           </button>
-          <h2 className="text-2xl font-bold"></h2>
+          <h2 className="text-2xl font-bold"> </h2>
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-8">
