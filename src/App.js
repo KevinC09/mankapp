@@ -1,0 +1,21 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { CartProvider } from '../src/Utils/cartContext';
+import LandingPage from './components/landingpage';
+import ProductSearch from './components/productsearch';
+import CartPage from './components/cartPage';
+import UserProfile from './components/userProfile';
+const App = () => (
+  <CartProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/catalogo" element={<ProductSearch />} />
+        <Route path="/carrito" element={<CartPage />} />
+        <Route path="/perfil" element={<UserProfile />} />
+      </Routes>
+    </Router>
+  </CartProvider>
+);
+
+export default App;
