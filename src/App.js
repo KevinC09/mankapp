@@ -5,6 +5,8 @@ import LandingPage from './components/landingpage';
 import ProductSearch from './components/productsearch';
 import CartPage from './components/cartPage';
 import UserProfile from './components/userProfile';
+import AboutManka from './components/aboutManka';
+import Manual from './components/manual';
 const App = () => (
   <CartProvider>
     <Router>
@@ -13,6 +15,8 @@ const App = () => (
         <Route path="/catalogo" element={<ProductSearch />} />
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/perfil" element={<UserProfile />} />
+        <Route path="/about" element={<AboutManka />} />
+        <Route path="/manual" element={<Manual />} />
       </Routes>
     </Router>
   </CartProvider>

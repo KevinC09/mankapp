@@ -7,6 +7,7 @@ import CrochetLogo from '../assets/crochet.png';
 import CeramicaLogo from '../assets/ceramica.png';
 import PinturaLogo from '../assets/pintura.png';
 import MaderaLogo from '../assets/madera.png';
+
 import {
   FaMugHot,
   FaPalette,
@@ -35,46 +36,104 @@ const LandingPage = () => {
 
   return (
     <div className="bg-[#F9F6F1] font-sans text-gray-800">
+      {/* Header Moderno */}
+      <header className="bg-white/80 shadow-sm sticky top-0 z-50 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Logo y Título */}
+          <div
+            className="flex items-center gap-3 cursor-pointer group"
+            onClick={() => navigate('/')}
+            title="Ir al inicio"
+          >
+            <img
+              src={BannerImage}
+              alt="Manka App"
+              className="h-10 w-10 rounded-full shadow-md border-2 border-[#8C5E3C] group-hover:scale-105 transition"
+            />
+            <span className="text-3xl font-serif italic text-[#8C5E3C] font-bold tracking-tight group-hover:text-red-500 transition">
+              Manka App
+            </span>
+          </div>
+          {/* Navegación e iconos */}
+          <nav className="flex items-center gap-6">
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F9F6F1] hover:bg-[#F3E6DB] text-[#8C5E3C] font-semibold shadow transition"
+              onClick={() => navigate('/catalogo')}
+            >
+              <FaSearch className="text-lg" />
+              Catálogo
+            </button>
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F9F6F1] hover:bg-[#F3E6DB] text-[#8C5E3C] font-semibold shadow transition"
+              onClick={() => {
+                const user = localStorage.getItem('manka_logged_user');
+                if (user) {
+                  navigate('/perfil');
+                } else {
+                  setShowAuth(true);
+                }
+              }}
+            >
+              <FaUserCircle className="text-lg" />
+              Mi Perfil
+            </button>
+            <button
+              className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-[#F9F6F1] hover:bg-[#F3E6DB] text-[#8C5E3C] font-semibold shadow transition"
+              onClick={() => navigate('/carrito')}
+            >
+              <FaShoppingBag className="text-lg" />
+              Carrito
+              {/* Puedes mostrar el número de productos en el carrito aquí si tienes esa variable */}
+              {/* <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span> */}
+            </button>
+          </nav>
+        </div>
+      </header>
+
       {/* Banner Principal */}
       <section className="relative">
         <div
-          className="w-full h-80 bg-cover bg-center"
-          style={{ backgroundImage: `url(${BannerImage})` }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-white bg-opacity-90 p-6 md:p-12 shadow-xl text-center max-w-2xl">
-            <p className="text-sm uppercase text-gray-600 mb-2 tracking-widest">
-              Conectando manos con el mundo
-            </p>
-            <h1 className="text-3xl font-serif italic ml-2">Manka App</h1>
-            <div className="flex justify-center space-x-8 text-gray-700">
-              <div className="flex flex-col items-center">
-                <FaMugHot className="text-3xl hover:text-red-500" />
-                <span className="mt-2 text-sm">Cerámica</span>
+          className="w-full h-80 bg-gradient-to-r from-[#F9F6F1] via-[#D4B29B]/40 to-[#B8D8D3]/60 flex items-center justify-center overflow-hidden"
+          style={{ backgroundImage: `url(${BannerImage})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}
+        >
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+          <div className="relative z-10 flex flex-col items-center justify-center w-full">
+            <div className="bg-white/90 rounded-2xl shadow-2xl px-8 py-10 md:py-14 md:px-16 max-w-3xl w-full flex flex-col items-center">
+              <p className="text-xs md:text-sm uppercase text-[#8C5E3C] mb-2 tracking-widest font-semibold">
+                Conectando manos con el mundo
+              </p>
+              <h1 className="text-4xl md:text-5xl font-serif italic font-bold text-[#8C5E3C] mb-4 tracking-tight drop-shadow">
+                Manka App
+              </h1>
+              <div className="flex flex-wrap justify-center gap-6 md:gap-10 my-4">
+                <div className="flex flex-col items-center group transition">
+                  <FaMugHot className="text-4xl md:text-5xl text-[#D4B29B] group-hover:text-[#B85C38] transition" />
+                  <span className="mt-2 text-sm font-medium text-gray-700 group-hover:text-[#8C5E3C]">Cerámica</span>
+                </div>
+                <div className="flex flex-col items-center group transition">
+                  <FaPalette className="text-4xl md:text-5xl text-[#D4B29B] group-hover:text-[#B85C38] transition" />
+                  <span className="mt-2 text-sm font-medium text-gray-700 group-hover:text-[#8C5E3C]">Pintura</span>
+                </div>
+                <div className="flex flex-col items-center group transition">
+                  <FaShoppingBag className="text-4xl md:text-5xl text-[#D4B29B] group-hover:text-[#B85C38] transition" />
+                  <span className="mt-2 text-sm font-medium text-gray-700 group-hover:text-[#8C5E3C]">Cuero</span>
+                </div>
+                <div className="flex flex-col items-center group transition">
+                  <FaGlassMartini className="text-4xl md:text-5xl text-[#D4B29B] group-hover:text-[#B85C38] transition" />
+                  <span className="mt-2 text-sm font-medium text-gray-700 group-hover:text-[#8C5E3C]">Vidrio</span>
+                </div>
+                <div className="flex flex-col items-center group transition">
+                  <FaTree className="text-4xl md:text-5xl text-[#D4B29B] group-hover:text-[#B85C38] transition" />
+                  <span className="mt-2 text-sm font-medium text-gray-700 group-hover:text-[#8C5E3C]">Mimbre</span>
+                </div>
               </div>
-              <div className="flex flex-col items-center">
-                <FaPalette className="text-3xl hover:text-red-500" />
-                <span className="mt-2 text-sm">Pintura</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <FaShoppingBag className="text-3xl hover:text-red-500" />
-                <span className="mt-2 text-sm">Cuero</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <FaGlassMartini className="text-3xl hover:text-red-500" />
-                <span className="mt-2 text-sm">Vidrio</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <FaTree className="text-3xl hover:text-red-500" />
-                <span className="mt-2 text-sm">Mimbre</span>
-              </div>
+              <button
+                className="mt-6 bg-gradient-to-r from-[#B85C38] to-[#D4B29B] text-white px-8 py-3 rounded-full font-semibold shadow-lg hover:scale-105 hover:from-[#8C5E3C] hover:to-[#B8D8D3] transition"
+                onClick={() => navigate('/catalogo')}
+              >
+                Explorar catálogo
+              </button>
             </div>
-            <button
-              className="mt-6 bg-red-500 text-white px-4 py-2 rounded"
-              onClick={() => navigate('/catalogo')}
-            >
-              Explorar
-            </button>
           </div>
         </div>
       </section>
@@ -131,25 +190,29 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Sección de Clases Virtuales */}
+      {/* Sección Manual de Usuario */}
       <section className="py-16 bg-white">
         <div className="container mx-auto grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 className="text-3xl font-bold mb-4">Aprende desde Casa</h2>
-            <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6">
-              <li>Acceso 24/7 a tutorías y talleres digitales</li>
-              <li>Material descargable y ejemplos prácticos</li>
-              <li>Sesiones en vivo con artesanos expertos</li>
-              <li>Certificados de participación</li>
+            <h2 className="text-3xl font-bold mb-4">Manual de Usuario</h2>
+            <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6 text-left">
+              <li><span className="font-semibold text-[#8C5E3C]">Crear una cuenta:</span> Aprende a registrarte y configurar tu perfil de artesano o comprador.</li>
+              <li><span className="font-semibold text-[#8C5E3C]">Publicar productos:</span> Paso a paso para subir tus artesanías, agregar fotos, descripciones y precios.</li>
+              <li><span className="font-semibold text-[#8C5E3C]">Comprar productos:</span> Cómo buscar, agregar al carrito y realizar una compra segura.</li>
+              <li><span className="font-semibold text-[#8C5E3C]">Gestionar tu perfil:</span> Edita tu información, cambia tu contraseña y personaliza tu experiencia.</li>
+              <li><span className="font-semibold text-[#8C5E3C]">Soporte y ayuda:</span> Dónde encontrar asistencia y resolver dudas frecuentes.</li>
             </ul>
-            <button className="bg-red-500 text-white px-6 py-3 rounded">
-              Ver Talleres
+            <button
+              className="bg-red-500 text-white px-6 py-3 rounded"
+              onClick={() => navigate('/manual')}
+            >
+              Ver Manual
             </button>
           </div>
           <div className="relative">
             <img
               src={VirtualClassImage}
-              alt="Clases Virtuales"
+              alt="Manual de Usuario"
               className="rounded shadow-lg w-48 mx-auto"
             />
           </div>
@@ -171,7 +234,7 @@ const LandingPage = () => {
             <p className="text-gray-600 mb-6">
               Manka App es la plataforma de comercio electrónico diseñada para artesanos salvadoreños. Nuestro objetivo es brindar un espacio donde puedas mostrar tu trabajo, conectar con clientes y aprender nuevas técnicas sin salir de casa. Aquí, cada pieza cuenta una historia y cada artesano deja su huella cultural.
             </p>
-            <button className="bg-[#D4B29B] text-white px-6 py-3 rounded">
+            <button className="bg-[#D4B29B] text-white px-6 py-3 rounded" onClick={() => navigate('/about')}>
               Conócelo más
             </button>
           </div>
