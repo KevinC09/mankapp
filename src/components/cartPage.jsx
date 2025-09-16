@@ -1,11 +1,82 @@
-import React, { useState } from 'react';
-import { useCart } from '../Utils/cartContext';
-import { FaArrowLeft, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../Utils/cartContext';
+import { FaArrowLeft, FaTrash, FaCheckCircle, FaBoxOpen, FaTruck, FaHome, FaRegClock } from 'react-icons/fa';
+
+// Componente de rastreo de pedido
+const TrackingSteps = [
+  {
+    label: "Preparando el pedido",
+    icon: <FaBoxOpen className="text-3xl text-[#8C5E3C]" />,
+    description: "Tu pedido está siendo preparado por el vendedor.",
+  },
+  {
+    label: "Pedido listo para envío",
+    icon: <FaRegClock className="text-3xl text-[#8C5E3C]" />,
+    description: "El pedido está listo y será enviado pronto.",
+  },
+  {
+    label: "En camino",
+    icon: <FaTruck className="text-3xl text-[#8C5E3C]" />,
+    description: "Tu pedido está en camino a la dirección indicada.",
+  },
+  {
+    label: "Entregado",
+    icon: <FaHome className="text-3xl text-[#8C5E3C]" />,
+    description: "¡El pedido ha sido entregado!",
+  },
+];
+
+const TrackingOrder = ({ onFinish }) => {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (step < TrackingSteps.length - 1) {
+      const timer = setTimeout(() => setStep(step + 1), 7000);
+      return () => clearTimeout(timer);
+    } else if (onFinish) {
+      // Opcional: llamar a una función cuando termina el rastreo
+      onFinish();
+    }
+  }, [step, onFinish]);
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-auto mt-8 text-center">
+      <h3 className="text-xl font-bold mb-6 text-[#8C5E3C]">Rastreo de tu pedido</h3>
+      <div className="flex flex-col items-center mb-6">
+        {TrackingSteps.map((s, idx) => (
+          <div key={s.label} className="flex items-center w-full mb-4">
+            <div className={`flex items-center justify-center rounded-full border-2 ${idx <= step ? 'border-[#8C5E3C] bg-[#F9F6F1]' : 'border-gray-300 bg-gray-100'} w-12 h-12`}>
+              {s.icon}
+            </div>
+            <div className="ml-4 flex-1 text-left">
+              <div className={`font-semibold ${idx === step ? 'text-[#8C5E3C]' : 'text-gray-500'}`}>{s.label}</div>
+              {idx === step && <div className="text-sm text-gray-700">{s.description}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="w-full h-2 bg-gray-200 rounded mb-4">
+        <div
+          className="h-2 bg-[#8C5E3C] rounded transition-all"
+          style={{ width: `${((step + 1) / TrackingSteps.length) * 100}%` }}
+        />
+      </div>
+      <div className="text-sm text-gray-500">
+        Estado actual: <span className="font-bold text-[#8C5E3C]">{TrackingSteps[step].label}</span>
+      </div>
+      {step === TrackingSteps.length - 1 && (
+        <div className="mt-6 text-green-600 font-bold">¡Gracias por tu compra!</div>
+      )}
+    </div>
+  );
+};
 
 const CartPage = () => {
-  const { cart, updateQty, removeFromCart, setCart } = useCart(); // agrega setCart
+  const { cart, setCart } = useCart();
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [lastCart, setLastCart] = useState([]);
 
   // Form state
   const [form, setForm] = useState({
@@ -15,12 +86,24 @@ const CartPage = () => {
     cvv: '',
     direccion: '',
   });
-  const [showModal, setShowModal] = useState(false);
 
   // Actualiza la cantidad de un producto en el carrito
+  const updateQty = (id, qty) => {
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.id === id ? { ...item, qty } : item
+      )
+    );
+  };
+
   const handleQtyChange = (id, value) => {
     const qty = Math.max(1, parseInt(value) || 1);
     updateQty(id, qty);
+  };
+
+  // Elimina un producto del carrito
+  const removeFromCart = (id) => {
+    setCart(prevCart => prevCart.filter(item => item.id !== id));
   };
 
   // Calcula el total
@@ -68,15 +151,39 @@ const CartPage = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
+    // Guarda los pedidos en localStorage
+    const allOrders = JSON.parse(localStorage.getItem('manka_orders') || '[]');
+    const now = new Date().toLocaleString();
+    const user = JSON.parse(localStorage.getItem('manka_logged_user') || 'null');
+    const newOrders = cart.map(product => ({
+      id: Date.now() + Math.random(), // id único
+      email: user?.email,
+      product,
+      date: now,
+    }));
+    localStorage.setItem('manka_orders', JSON.stringify([...allOrders, ...newOrders]));
+    setLastCart(cart); // Guarda el carrito antes de vaciarlo
     setShowModal(true);
-    descontarCantidad(cart); // Descontar cantidad automáticamente al finalizar compra
-    setCart([]); // Limpiar el carrito al finalizar la compra
+    descontarCantidad(cart);
+    // Guarda los productos comprados en localStorage para rastreo
+    localStorage.setItem('manka_last_order', JSON.stringify(cart));
+    setCart([]);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    navigate('/catalogo');
-  };
+  // Redirige automáticamente al rastreo después de la confirmación
+  useEffect(() => {
+    if (showModal) {
+      const timer = setTimeout(() => {
+        setShowModal(false);
+        if (lastCart.length > 0) {
+          navigate(`/rastreo/${lastCart[0].id}`);
+        } else {
+          navigate('/catalogo');
+        }
+      }, 3500); // 3.5 segundos de espera en el mensaje de confirmación
+      return () => clearTimeout(timer);
+    }
+  }, [showModal, lastCart, navigate]);
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
@@ -229,15 +336,11 @@ const CartPage = () => {
               Tu pedido ha sido procesado exitosamente.<br />
               Pronto recibirás un correo con los detalles.
             </p>
-            <button
-              onClick={handleCloseModal}
-              className="bg-[#8C5E3C] text-white px-6 py-2 rounded-lg hover:bg-[#7a4b2f] transition text-lg"
-            >
-              Volver al catálogo
-            </button>
+            <span className="text-[#8C5E3C] font-semibold">Redirigiendo al rastreo...</span>
           </div>
         </div>
       )}
+      {/* El rastreo ahora está en StatusPage */}
     </div>
   );
 };

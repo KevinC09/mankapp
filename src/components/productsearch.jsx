@@ -22,6 +22,7 @@ const ProductSearch = ({ onBack }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const { cartCount, addToCart } = useCart();
   const [showAuth, setShowAuth] = useState(false);
+  const [showAddedPopup, setShowAddedPopup] = useState(false);
 
   // Categorías (asegúrate que coincidan con las del perfil)
   const categories = [
@@ -88,6 +89,12 @@ const ProductSearch = ({ onBack }) => {
     setSelectedCategory(catKey);
     setResults([]);
     setQuery('');
+  };
+
+  const handleAddToCart = (item) => {
+    addToCart(item);
+    setShowAddedPopup(true);
+    setTimeout(() => setShowAddedPopup(false), 2000);
   };
 
   return (
@@ -241,7 +248,7 @@ const ProductSearch = ({ onBack }) => {
                     </div>
                   </div>
                   <button
-                    onClick={() => addToCart(item)}
+                    onClick={() => handleAddToCart(item)}
                     className="w-full bg-[#8C5E3C] text-white py-2 rounded-b-lg hover:bg-[#7a4b2f] transition mt-auto text-lg"
                   >
                     Agregar al carrito
@@ -269,6 +276,13 @@ const ProductSearch = ({ onBack }) => {
         </div>
       </footer>
       <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
+
+      {/* Popup de agregado al carrito */}
+      {showAddedPopup && (
+        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 bg-[#8C5E3C] text-white px-6 py-3 rounded-lg shadow-lg text-lg font-semibold transition">
+          Agregado al carrito
+        </div>
+      )}
     </div>
   );
 };

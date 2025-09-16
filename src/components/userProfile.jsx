@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserCircle, FaStore, FaSignOutAlt, FaUserEdit, FaArrowLeft, FaStar, FaImage } from 'react-icons/fa';
+import { FaUserCircle, FaStore, FaSignOutAlt, FaUserEdit, FaArrowLeft, FaStar, FaImage, FaClipboardList } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import AuthModal from './authModal';
+import ReactModal from 'react-modal'; // Si no tienes instalado, usa npm install react-modal
 
 // Utilidad para obtener y actualizar usuario logueado en localStorage
 const getLoggedUser = () => JSON.parse(localStorage.getItem('manka_logged_user') || 'null');
@@ -52,10 +54,13 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(getLoggedUser());
   const [menu, setMenu] = useState('general');
+  const [orders, setOrders] = useState([]);
+
   const [form, setForm] = useState({
     nombre: user?.nombre || '',
     email: user?.email || '',
     password: user?.password || '',
+    imagen: user?.imagen || '',
   });
 
   const [success, setSuccess] = useState('');
@@ -84,14 +89,27 @@ const UserProfile = () => {
   });
   const [editImgPreview, setEditImgPreview] = useState('');
 
+  // Modal de suspensión
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+
+  // Estado de suspensión
+  const [isSuspended, setIsSuspended] = useState(user?.suspendida || false);
+
   useEffect(() => {
     setUser(getLoggedUser());
     setForm({
       nombre: user?.nombre || '',
       email: user?.email || '',
       password: user?.password || '',
+      imagen: user?.imagen || '',
     });
     setProducts(getUserProducts(user?.email || ''));
+    setIsSuspended(user?.suspendida || false);
+
+    // Cargar pedidos del usuario
+    const allOrders = JSON.parse(localStorage.getItem('manka_orders') || '[]');
+    const myOrders = allOrders.filter(o => o.email === user?.email);
+    setOrders(myOrders);
     // eslint-disable-next-line
   }, []);
 
@@ -239,13 +257,58 @@ const UserProfile = () => {
     setProdSuccess('');
   };
 
+  // Suspender cuenta
+  const handleSuspendAccount = () => {
+    const updatedUser = { ...user, suspendida: true };
+    setUser(updatedUser);
+    updateLoggedUser(updatedUser);
+    setIsSuspended(true);
+    setShowSuspendModal(false);
+    localStorage.removeItem('manka_logged_user');
+    navigate('/');
+  };
+
+  // Renderiza la lista de pedidos
+  const renderOrders = () => (
+    <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-8">
+      <h2 className="text-2xl font-bold mb-6 text-[#8C5E3C]">Mis pedidos</h2>
+      {orders.length === 0 ? (
+        <div className="text-gray-500 text-center">No has realizado pedidos aún.</div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {orders.map((order, idx) => (
+            <div key={order.id || idx} className="border rounded p-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <img
+                  src={order.product.image || order.product.imagen}
+                  alt={order.product.name || order.product.nombre}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <div>
+                  <div className="font-semibold text-[#8C5E3C]">{order.product.name || order.product.nombre}</div>
+                  <div className="text-gray-700 text-sm">Fecha: {order.date || 'Sin fecha'}</div>
+                </div>
+              </div>
+              <button
+                className="bg-[#B8D8D3] text-[#8C5E3C] px-3 py-1 rounded hover:bg-[#8C5E3C] hover:text-white text-sm transition"
+                onClick={() => navigate(`/rastreo/${order.product.id}`)}
+              >
+                Ver rastreo
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <div className="bg-gray-50 min-h-screen font-sans flex">
+    <div className="bg-gray-50 min-h-screen font-sans flex flex-col md:flex-row">
       {/* Menú lateral */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col py-8 px-4">
+      <aside className="w-full md:w-64 bg-white shadow-lg flex flex-row md:flex-col py-4 md:py-8 px-2 md:px-4 items-center md:items-stretch">
         <button
           className="mb-6 flex items-center gap-2 text-[#8C5E3C] hover:text-[#7a4b2f] font-semibold"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/catalogo')}
         >
           <FaArrowLeft /> Volver
         </button>
@@ -285,6 +348,16 @@ const UserProfile = () => {
           >
             <FaStore /> Vendedor
           </button>
+          <button
+            className={`flex items-center gap-2 px-4 py-2 rounded transition ${
+              menu === 'orders'
+                ? 'bg-[#F3E6DB] text-[#8C5E3C] font-bold'
+                : 'hover:bg-[#F9F6F1] text-gray-700'
+            }`}
+            onClick={() => setMenu('orders')}
+          >
+            <FaClipboardList /> Mis pedidos
+          </button>
         </nav>
         <button
           className="mt-auto flex items-center gap-2 px-4 py-2 rounded bg-red-100 text-red-600 hover:bg-red-200 transition font-semibold"
@@ -294,7 +367,7 @@ const UserProfile = () => {
         </button>
       </aside>
       {/* Contenido principal */}
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-4 md:p-10">
         {menu === 'general' && (
           <div className="max-w-xl mx-auto bg-white rounded-lg shadow p-8">
             <h2 className="text-2xl font-bold mb-6 text-[#8C5E3C]">Información General</h2>
@@ -368,6 +441,37 @@ const UserProfile = () => {
                 Guardar cambios
               </button>
             </form>
+            <button
+              className="mt-6 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition font-semibold w-full"
+              onClick={() => setShowSuspendModal(true)}
+              disabled={isSuspended}
+            >
+              {isSuspended ? 'Cuenta suspendida' : 'Suspender cuenta'}
+            </button>
+            <ReactModal
+              isOpen={showSuspendModal}
+              onRequestClose={() => setShowSuspendModal(false)}
+              className="bg-white rounded-lg shadow-lg p-8 max-w-sm mx-auto mt-32 outline-none"
+              overlayClassName="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+              ariaHideApp={false}
+            >
+              <h3 className="text-xl font-bold mb-4 text-[#8C5E3C]">¿Seguro que quieres suspender tu cuenta?</h3>
+              <p className="mb-6 text-gray-700">Tu cuenta quedará inactiva y no podrás iniciar sesión hasta reactivarla.</p>
+              <div className="flex gap-4">
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded font-semibold"
+                  onClick={handleSuspendAccount}
+                >
+                  Suspender
+                </button>
+                <button
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded font-semibold"
+                  onClick={() => setShowSuspendModal(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </ReactModal>
           </div>
         )}
         {menu === 'vendedor' && (
@@ -618,6 +722,7 @@ const UserProfile = () => {
             </div>
           </div>
         )}
+        {menu === 'orders' && renderOrders()}
       </main>
     </div>
   );
